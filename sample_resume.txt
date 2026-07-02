@@ -1,0 +1,33 @@
+Jane Doe
+Senior Full Stack Engineer
+Email: jane.doe@example.com | Phone: +1-555-0199 | Location: San Francisco, CA
+GitHub: github.com/janedoe | LinkedIn: linkedin.com/in/janedoe
+
+PROFESSIONAL SUMMARY
+Highly accomplished Senior Full Stack Engineer with 5+ years of experience designing, building, and deploying scalable web applications. Expert in Python, FastAPI, React, and SQL database design. Proven track record of optimizing application performance and leading engineering initiatives.
+
+TECHNICAL SKILLS
+- Languages: Python, JavaScript, TypeScript, SQL, HTML, CSS
+- Frameworks: FastAPI, Flask, React, Next.js, Express.js
+- Databases: PostgreSQL, SQLite, Redis
+- Tools & DevOps: Docker, Git, AWS (S3, EC2, RDS), CI/CD (GitHub Actions)
+
+PROFESSIONAL EXPERIENCE
+Senior Software Engineer | TechCorp Inc. | Jan 2023 - Present
+- Architected and built microservices using Python and FastAPI, increasing API response times by 35%.
+- Led a team of 4 frontend developers to build a modern dashboard using React and Tailwind CSS, improving user engagement by 20%.
+- Integrated PostgreSQL database with optimized indexes, reducing complex query times from 5s to under 200ms.
+- Migrated legacy services to Docker containers, streamlining local development and production deployment.
+
+Software Engineer | DevGroup LLC | Jun 2021 - Dec 2022
+- Developed RESTful APIs using Python/Flask and integrated with React frontend components.
+- Configured automated CI/CD pipelines via GitHub Actions, reducing deployment errors by 15%.
+- Maintained and optimized database queries, ensuring high availability of user records.
+
+PROJECTS
+CloudTask Manager
+- Built a task management system using FastAPI, React, and PostgreSQL, deployed on AWS EC2.
+- Implemented JWT token auth and role-based access control (RBAC).
+
+EDUCATION
+Bachelor of Science in Computer Science | State University | Graduated May 2021

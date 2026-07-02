@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Career Guidance & Resume AI Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome for standard icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Auth View (Shown by default if no token) -->
+    <div id="auth-view" class="auth-container">
+        <div class="card auth-card">
+            <div class="logo-container" style="justify-content: center; margin-bottom: 2rem;">
+                <div class="logo-icon">C</div>
+                <div class="logo-text" style="font-size: 1.5rem;">CareerAI Enterprise</div>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="login-form">
+                <h3 style="margin-bottom: 1.5rem; text-align: center;">Welcome Back</h3>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="login-email" class="form-control" placeholder="name@company.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                    Sign In <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                <p style="text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-muted);">
+                    Don't have an account? <a href="#" id="toggle-to-signup" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign Up</a>
+                </p>
+            </form>
+
+            <!-- Signup Form (Hidden initially) -->
+            <form id="signup-form" style="display: none;">
+                <h3 style="margin-bottom: 1.5rem; text-align: center;">Create Account</h3>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signup-name" class="form-control" placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="signup-email" class="form-control" placeholder="name@company.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signup-password" class="form-control" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                    Get Started <i class="fa-solid fa-user-plus"></i>
+                </button>
+                <p style="text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-muted);">
+                    Already have an account? <a href="#" id="toggle-to-login" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign In</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Workspace View (Hidden initially) -->
+    <div id="app-view" class="app-container" style="display: none;">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div>
+                <div class="logo-container">
+                    <div class="logo-icon">C</div>
+                    <div class="logo-text">CareerAI</div>
+                </div>
+                <nav>
+                    <ul class="nav-links">
+                        <li>
+                            <a class="nav-item active" onclick="switchTab('dashboard')">
+                                <i class="fa-solid fa-chart-line"></i>
+                                <span class="nav-text">Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-item" onclick="switchTab('analyzer')">
+                                <i class="fa-solid fa-file-invoice"></i>
+                                <span class="nav-text">Resume Analyzer</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-item" onclick="switchTab('career-hub')">
+                                <i class="fa-solid fa-compass"></i>
+                                <span class="nav-text">Career Coach</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-item" onclick="switchTab('learning-hub')">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                                <span class="nav-text">Learning Hub</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-item" onclick="switchTab('settings')">
+                                <i class="fa-solid fa-sliders"></i>
+                                <span class="nav-text">Settings</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-profile-badge">
+                    <div class="user-avatar" id="avatar-letter">U</div>
+                    <div class="user-info">
+                        <div class="user-name" id="profile-full-name">Loading...</div>
+                        <div style="color: var(--text-muted); font-size: 0.75rem;">Premium Member</div>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" onclick="logout()" style="width: 100%; padding: 0.5rem 1rem; font-size: 0.85rem;">
+                    <i class="fa-solid fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header bar with theme toggle -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <div>
+                    <h2 class="hero-gradient-text" style="font-size: 1.85rem; margin-bottom: 0;">Enterprise Command Center</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Empower your career growth using 11 specialized AI Agents.</p>
+                </div>
+                <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                    <i class="fa-solid fa-moon" id="theme-icon"></i>
+                </button>
+            </div>
+
+            <!-- TAB 1: DASHBOARD -->
+            <section id="tab-dashboard" class="tab-content active">
+                <div class="dashboard-grid">
+                    <div>
+                        <div class="card" style="height: 100%;">
+                            <h3 style="margin-bottom: 1rem;"><i class="fa-solid fa-clock-history"></i> Recent Analyses</h3>
+                            <div id="recent-reports-container" class="interactive-list">
+                                <p style="color: var(--text-muted); font-style: italic;">No analyses generated yet. Go to 'Resume Analyzer' to start your first evaluation.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card">
+                            <h3 style="margin-bottom: 1.5rem; text-align: center;"><i class="fa-solid fa-ranking-star"></i> Top Match</h3>
+                            <div class="ats-score-ring" id="dashboard-score-ring" style="--score-percent: 0%;">
+                                <div class="ats-score-value">
+                                    <span id="dashboard-score-val">--</span>
+                                    <span class="ats-score-label">Match</span>
+                                </div>
+                            </div>
+                            <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem;" id="dashboard-score-desc">
+                                Upload a resume and job description to estimate target ATS compatibility.
+                            </p>
+                        </div>
+                        <div class="card">
+                            <h3 style="margin-bottom: 1rem;"><i class="fa-solid fa-circle-info"></i> Agent Status</h3>
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.85rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Parser & Keyword Agents</span>
+                                    <span class="badge badge-success">Online</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>ATS & Recruiter Engine</span>
+                                    <span class="badge badge-success">Online</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Coaching & Interview simulation</span>
+                                    <span class="badge badge-success">Online</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: RESUME ANALYZER -->
+            <section id="tab-analyzer" class="tab-content">
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem;"><i class="fa-solid fa-plus-circle"></i> Start New Analysis</h3>
+                    <form id="analyzer-form">
+                        <div class="form-group">
+                            <label>LLM Settings & Keys</label>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: 6px;">
+                                <i class="fa-solid fa-key"></i> Set model settings and API keys in the <strong>Settings</strong> tab to activate.
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Target Job Description</label>
+                            <textarea id="analyzer-jd" class="form-control" placeholder="Paste the target job description here..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Upload Resume (PDF, DOCX or TXT)</label>
+                            <input type="file" id="analyzer-file" class="form-control" accept=".pdf,.docx,.doc,.txt" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="analyzer-submit-btn">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Launch 11-Agent Crew Analysis
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Analysis Progress State (Hidden initially) -->
+                <div class="card" id="analysis-progress-card" style="display: none;">
+                    <div class="pulsing-loader">
+                        <div class="loader-spinner"></div>
+                        <div class="loader-text" id="progress-status-msg">Running CrewAI multi-agent pipeline...</div>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 1rem; max-width: 450px;">
+                            The 11 agents are collaborating sequentially. They extract profiles, analyze ATS gaps, format, check keywords, critique as hiring managers, rewrite bullet points, and build your roadmap. This may take 1-2 minutes.
+                        </p>
+                        <div class="progress-container" style="width: 100%; max-width: 450px;">
+                            <div class="progress-bar-fill" id="analysis-progress-bar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Results View (Hidden initially) -->
+                <div id="analysis-result-view" style="display: none;">
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <h3 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-file-contract"></i> Executive Analysis Report</h3>
+                            <div id="report-markdown-body" class="report-markdown">
+                                <!-- Generated report goes here -->
+                            </div>
+                        </div>
+                        <div>
+                            <div class="card" style="text-align: center;">
+                                <h3 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-gauge-high"></i> ATS Match Score</h3>
+                                <div class="ats-score-ring" id="result-ats-ring" style="--score-percent: 75%;">
+                                    <div class="ats-score-value">
+                                        <span id="result-ats-val">75%</span>
+                                        <span class="ats-score-label">Match</span>
+                                    </div>
+                                </div>
+                                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 1rem;">
+                                    Estimated percentage fit for structural syntax matching, core keyword matching, and recruiter criteria.
+                                </p>
+                            </div>
+                            <div class="card">
+                                <h3>Actions</h3>
+                                <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem;">
+                                    <button class="btn btn-secondary" onclick="printReport()"><i class="fa-solid fa-print"></i> Export to Print</button>
+                                    <button class="btn btn-secondary" onclick="switchTab('analyzer')"><i class="fa-solid fa-arrow-rotate-left"></i> Run Another</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: CAREER COACH -->
+            <section id="tab-career-hub" class="tab-content">
+                <div class="card">
+                    <h3><i class="fa-solid fa-compass"></i> Career Coaching & Roadmap Builder</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                        Identify career progression gaps and build customized study, certification, and project roadmaps to pivot into your dream role.
+                    </p>
+                    <form id="roadmap-form">
+                        <div class="form-group">
+                            <label>Target Role Title</label>
+                            <input type="text" id="roadmap-role" class="form-control" placeholder="e.g. Senior Machine Learning Engineer" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Target Industry</label>
+                            <input type="text" id="roadmap-industry" class="form-control" placeholder="e.g. Finance, Healthcare, Autonomous Vehicles" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Current Skills</label>
+                            <textarea id="roadmap-skills" class="form-control" placeholder="List your key tech skills and tools..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="roadmap-submit-btn">
+                            <i class="fa-solid fa-route"></i> Generate Learning Roadmap
+                        </button>
+                    </form>
+                </div>
+
+                <div class="card" id="roadmap-progress-card" style="display: none;">
+                    <div class="pulsing-loader">
+                        <div class="loader-spinner"></div>
+                        <div class="loader-text">Coaching Agent is designing your pathway...</div>
+                    </div>
+                </div>
+
+                <div class="card" id="roadmap-result-card" style="display: none;">
+                    <h3 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-map-signs"></i> Customized Roadmap Path</h3>
+                    <div id="roadmap-result-body" class="report-markdown"></div>
+                    <button class="btn btn-secondary" style="margin-top: 1rem;" onclick="document.getElementById('roadmap-result-card').style.display='none'; document.getElementById('roadmap-form').reset();"><i class="fa-solid fa-rotate-left"></i> Create New Plan</button>
+                </div>
+            </section>
+
+            <!-- TAB 4: LEARNING HUB -->
+            <section id="tab-learning-hub" class="tab-content">
+                <div class="card">
+                    <h3><i class="fa-solid fa-graduation-cap"></i> Technical Interview Simulator</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                        Simulate rigorous interviewing pipelines based on specific role targets and job description requirements.
+                    </p>
+                    <form id="interview-form">
+                        <div class="form-group">
+                            <label>Job Description Context</label>
+                            <textarea id="interview-jd" class="form-control" placeholder="Paste the job description or role requirements here..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Target Position Title</label>
+                            <input type="text" id="interview-role" class="form-control" placeholder="e.g. Full Stack Developer" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="interview-submit-btn">
+                            <i class="fa-solid fa-laptop-code"></i> Generate Interview Prep Sheet
+                        </button>
+                    </form>
+                </div>
+
+                <div class="card" id="interview-progress-card" style="display: none;">
+                    <div class="pulsing-loader">
+                        <div class="loader-spinner"></div>
+                        <div class="loader-text">Interview Agent is assembling practice sheet...</div>
+                    </div>
+                </div>
+
+                <div class="card" id="interview-result-card" style="display: none;">
+                    <h3 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-list-check"></i> Practice Material</h3>
+                    <div id="interview-result-body" class="report-markdown"></div>
+                    <button class="btn btn-secondary" style="margin-top: 1rem;" onclick="document.getElementById('interview-result-card').style.display='none'; document.getElementById('interview-form').reset();"><i class="fa-solid fa-rotate-left"></i> New Session</button>
+                </div>
+            </section>
+
+            <!-- TAB 5: SETTINGS -->
+            <section id="tab-settings" class="tab-content">
+                <div class="card">
+                    <h3><i class="fa-solid fa-gears"></i> Model Settings & Core Keys</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                        Select which model engine to run for the CrewAI Multi-Agent execution. Keep your key saved locally in the database.
+                    </p>
+                    <form id="settings-form">
+                        <div class="form-group">
+                            <label>LLM Service Provider</label>
+                            <select id="settings-provider" class="form-control">
+                                <option value="gemini">Google Gemini (Recommended)</option>
+                                <option value="openai">OpenAI (GPT-4o)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>API Key</label>
+                            <input type="password" id="settings-api-key" class="form-control" placeholder="Paste your API key here..." required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-save"></i> Save Settings
+                        </button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>Enterprise Subscription Status</h3>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 1rem;">
+                        <div>
+                            <p style="font-weight: 600;">Enterprise Unlimited Plan</p>
+                            <p style="font-size: 0.85rem; color: var(--text-muted);">Access to all 11 Agents, custom templates, and resume downloads.</p>
+                        </div>
+                        <span class="badge badge-success" style="padding: 0.5rem 1rem;">Active</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px;"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

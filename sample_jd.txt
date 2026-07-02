@@ -1,0 +1,16 @@
+Position: Senior Software Engineer (Python/FastAPI)
+
+Company description:
+We are a fast-growing SaaS tech startup looking for a Senior Software Engineer to lead the architecture and development of our core API platforms. You will collaborate closely with product managers and frontend developers to design high-performance microservices.
+
+Requirements:
+- 5+ years of software development experience.
+- Expert proficiency in Python and modern web frameworks (FastAPI preferred, Flask/Django accepted).
+- Strong hands-on experience with frontend frameworks (React, Next.js).
+- Deep understanding of relational databases (PostgreSQL/MySQL) and writing optimized queries.
+- Experienced with containerization (Docker) and cloud platforms (AWS/GCP).
+- Excellent communication skills and experience mentoring junior developers.
+
+Nice-to-have:
+- Experience with Redis caching.
+- Familiarity with CI/CD deployment pipelines (GitHub Actions).

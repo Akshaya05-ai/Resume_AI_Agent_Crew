@@ -1,0 +1,11 @@
+.venv/
+git-portable/
+platform.db
+__pycache__/
+*.log
+.system_generated/
+*.pyc
+*.webp
+*.png
+.tempmediaStorage/
+browser/
