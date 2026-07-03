@@ -2,8 +2,11 @@ services:
   - type: web
     name: resume-ai-agent-crew
     runtime: python
+    repo: https://github.com/Akshaya05-ai/Resume_AI_Agent_Crew
+    branch: main
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
     envVars:
       - key: DATABASE_URL
         value: sqlite:////data/platform.db
