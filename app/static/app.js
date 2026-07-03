@@ -312,9 +312,12 @@ function trackProgress(reportId) {
                     fetchReportsHistory();
                 } else if (report.status === "FAILED") {
                     clearInterval(pollInterval);
-                    showToast(report.error_message || "Analysis failed.", "error");
+                    const errMsg = report.error_message || "Analysis failed. Check your API key and try again.";
+                    showToast(`Analysis failed: ${errMsg.substring(0, 120)}`, "error");
                     document.getElementById("analyzer-form").style.display = "block";
                     document.getElementById("analysis-progress-card").style.display = "none";
+                    // Log full error to console for debugging
+                    console.error("Analysis FAILED:", report.error_message);
                 } else {
                     // Update dummy progress increment to look realistic
                     if (progressVal < 90) progressVal += 5;

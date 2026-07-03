@@ -1,5 +1,10 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
+import traceback
 import threading
+import time
+import logging
 from typing import List, Optional
 from fastapi import FastAPI, Depends, File, UploadFile, Form, Header, HTTPException, status, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +17,10 @@ from app.database import init_db, get_db, User, Resume, Report, CareerActivity
 from app.auth import router as auth_router, get_current_user
 from app.parser import parse_resume
 from app.crew_engine import run_resume_analysis, run_career_roadmap, run_interview_simulator
+
+# Logging configuration
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s [%(levelname)s] %(name)s: %(message)s')
+logger = logging.getLogger("Resume_AI_Main")
 
 app = FastAPI(title="Enterprise Career & Resume AI Platform")
 
@@ -34,24 +43,36 @@ app.include_router(auth_router)
 
 # --- Background CrewAI Thread Worker ---
 def execute_crewai_analysis(report_id: int, resume_text: str, job_description: str, provider: str, api_key: str):
+    logger.debug(f"[THREAD START] Starting execute_crewai_analysis for report_id: {report_id} using provider: {provider}")
+    db_start = time.time()
     db: Session = next(get_db())
     report = db.query(Report).filter(Report.id == report_id).first()
     if not report:
+        logger.error(f"[THREAD ERROR] Report with id {report_id} not found in DB.")
         return
+    logger.debug(f"[DB READ] Report retrieved in {time.time() - db_start:.4f}s")
         
     try:
+        logger.debug(f"[DB UPDATE] Setting status to RUNNING for report_id: {report_id}")
+        db_start = time.time()
         report.status = "RUNNING"
         db.commit()
+        logger.debug(f"[DB COMMIT] Status set to RUNNING in {time.time() - db_start:.4f}s")
         
-        # Trigger the CrewAI orchestrator
+        logger.debug(f"[CREWAI START] Initializing CrewAI and executing analysis for report_id: {report_id}")
+        crew_start = time.time()
         results = run_resume_analysis(
             resume_text=resume_text,
             job_description=job_description,
             provider=provider,
             api_key=api_key
         )
+        crew_duration = time.time() - crew_start
+        logger.debug(f"[CREWAI COMPLETE] Analysis succeeded in {crew_duration:.4f}s")
         
         # Save results back to DB
+        logger.debug(f"[DB UPDATE] Saving analysis results and setting status to COMPLETED for report_id: {report_id}")
+        db_start = time.time()
         report.match_score = results["match_score"]
         report.parsed_profile = results["parsed_profile"]
         report.gap_analysis = results["gap_analysis"]
@@ -59,12 +80,20 @@ def execute_crewai_analysis(report_id: int, resume_text: str, job_description: s
         report.full_report = results["full_report"]
         report.status = "COMPLETED"
         db.commit()
+        logger.debug(f"[DB COMMIT] Results saved, status COMPLETED in {time.time() - db_start:.4f}s")
         
     except Exception as e:
-        report.status = "FAILED"
-        report.error_message = str(e)
-        db.commit()
-        print(f"Error in CrewAI Thread worker: {str(e)}")
+        error_detail = traceback.format_exc()
+        logger.error(f"[THREAD EXCEPTION] CrewAI analysis failed for report_id {report_id} with error: {str(e)}\n{error_detail}")
+        try:
+            logger.debug(f"[DB UPDATE] Setting status to FAILED for report_id: {report_id}")
+            db_start = time.time()
+            report.status = "FAILED"
+            report.error_message = f"{type(e).__name__}: {str(e)}"
+            db.commit()
+            logger.debug(f"[DB COMMIT] Status FAILED saved in {time.time() - db_start:.4f}s")
+        except Exception as db_err:
+            logger.error(f"[DB EXCEPTION] Failed to write failure status to DB: {str(db_err)}")
 
 # --- Endpoints ---
 
@@ -90,29 +119,45 @@ def start_analysis(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     job_description: str = Form(...),
-    x_llm_provider: str = Header("gemini"),
-    x_llm_key: str = Header(...),
+    x_llm_provider: str = Header(default="gemini"),
+    x_llm_key: Optional[str] = Header(default=None),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Upload resume, parse text, and trigger CrewAI background thread execution."""
+    logger.debug("[REQUEST RECEIVED] POST /api/reports/analyze")
+    logger.debug(f"[LLM PROVIDER] x-llm-provider: {x_llm_provider}")
     if not x_llm_key:
+        logger.warning("[AUTH WARNING] LLM API key header (x-llm-key) is missing.")
         raise HTTPException(status_code=400, detail="LLM API key header is missing.")
-        
+    
     # 1. Read file and parse text
+    logger.debug(f"[RESUME UPLOAD] Reading uploaded file: {file.filename}")
+    upload_start = time.time()
     try:
         file_bytes = file.file.read()
+        logger.debug(f"[RESUME UPLOAD] File read successfully ({len(file_bytes)} bytes) in {time.time() - upload_start:.4f}s")
+        
+        logger.debug(f"[RESUME PARSING START] Parsing content for {file.filename}")
+        parse_start = time.time()
         resume_text = parse_resume(file.filename, file_bytes)
+        logger.debug(f"[RESUME PARSING COMPLETE] Parsing finished in {time.time() - parse_start:.4f}s")
     except Exception as e:
+        logger.error(f"[PARSING ERROR] Error parsing uploaded resume: {str(e)}\n{traceback.format_exc()}")
         raise HTTPException(
             status_code=400,
             detail=f"Failed to parse upload resume: {str(e)}"
         )
         
     if not resume_text.strip():
+        logger.warning("[PARSING WARNING] Extracted resume text content is empty.")
         raise HTTPException(status_code=400, detail="The uploaded resume text content is empty.")
 
+    logger.debug(f"[JD UPLOAD] Job Description length: {len(job_description)} characters")
+
     # 2. Save resume entry
+    logger.debug("[DB INSERT] Creating and saving Resume entry")
+    db_start = time.time()
     resume = Resume(
         user_id=current_user.id,
         filename=file.filename,
@@ -121,8 +166,11 @@ def start_analysis(
     db.add(resume)
     db.commit()
     db.refresh(resume)
+    logger.debug(f"[DB INSERT COMPLETE] Resume inserted (ID: {resume.id}) in {time.time() - db_start:.4f}s")
 
     # 3. Create initial pending report
+    logger.debug("[DB INSERT] Creating and saving Report entry (status: PENDING)")
+    db_start = time.time()
     report = Report(
         resume_id=resume.id,
         job_description=job_description,
@@ -131,9 +179,10 @@ def start_analysis(
     db.add(report)
     db.commit()
     db.refresh(report)
+    logger.debug(f"[DB INSERT COMPLETE] Report inserted (ID: {report.id}) in {time.time() - db_start:.4f}s")
 
     # 4. Delegate to background thread worker
-    # We use a standard python Thread so FastAPI returns immediately
+    logger.debug("[BACKGROUND DELEGATION] Spawning execute_crewai_analysis thread")
     thread = threading.Thread(
         target=execute_crewai_analysis,
         kwargs={
@@ -147,6 +196,7 @@ def start_analysis(
     thread.start()
 
     # Convert to schema format
+    logger.debug(f"[RESPONSE GENERATION] Returning success response for report_id: {report.id}")
     return {
         "id": report.id,
         "resume_id": report.resume_id,
@@ -218,8 +268,8 @@ class InterviewRequest(BaseModel):
 @app.post("/api/coaching/roadmap")
 def build_roadmap(
     req: RoadmapRequest,
-    x_llm_provider: str = Header("gemini"),
-    x_llm_key: str = Header(...),
+    x_llm_provider: str = Header(default="gemini"),
+    x_llm_key: Optional[str] = Header(default=None),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -256,8 +306,8 @@ def build_roadmap(
 @app.post("/api/coaching/interview")
 def simulate_interview(
     req: InterviewRequest,
-    x_llm_provider: str = Header("gemini"),
-    x_llm_key: str = Header(...),
+    x_llm_provider: str = Header(default="gemini"),
+    x_llm_key: Optional[str] = Header(default=None),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):

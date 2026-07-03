@@ -1,4 +1,5 @@
 import datetime
+import os
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -11,7 +12,7 @@ from app.database import get_db, User
 # Security configurations
 # In a real app, this should come from environment variables.
 # We'll use a default fallback to make it work out of the box.
-SECRET_KEY = "SUPER_SECRET_KEY_FOR_RESUME_AI_PLATFORM_ENTERPRISE_GRADE"
+SECRET_KEY = os.getenv("SECRET_KEY", "SUPER_SECRET_KEY_FOR_RESUME_AI_PLATFORM_ENTERPRISE_GRADE")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 600  # Long duration for local developer convenience
 

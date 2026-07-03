@@ -1,11 +1,66 @@
+# Local Virtual Environments
 .venv/
-git-portable/
-platform.db
+env/
+venv/
+ENV/
+
+# Python Cache & Compiled Files
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment Variables & Sensitive Config
+.env
+.env.*
+
+# Local Database Files
+platform.db
+platform.db-shm
+platform.db-wal
+*.sqlite
+*.sqlite3
+
+# Logs & Temporary Files
+logs/
 *.log
 .system_generated/
-*.pyc
-*.webp
-*.png
 .tempmediaStorage/
 browser/
+tmp/
+temp/
+
+# Portables & External Tools
+git-portable/
+.git-portable/
+
+# Editor & IDE Configs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Dependencies & Node Modules
+node_modules/
+
+# Build & Dist Outputs
+dist/
+build/
+bin/
+obj/
+out/
+
+# OS-Specific Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Output Media & Visual Assets (local screenshots etc.)
+*.webp
+*.png
+*.jpg
+*.jpeg
+*.gif
